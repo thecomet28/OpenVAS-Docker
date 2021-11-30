@@ -10,8 +10,8 @@ RUN bash /install-pkgs.sh
 ENV gvm_libs_version="v21.4.3" \
     openvas_scanner_version="v21.4.3" \
     openvas_smb="v21.4.0" \
-    open_scanner_protocol_daemon="v21.4.3" \
-    ospd_openvas="v21.4.2"
+    open_scanner_protocol_daemon="v21.4.4" \
+    ospd_openvas="v21.4.3"
 
 RUN echo "Starting Build..." && mkdir /build
 
