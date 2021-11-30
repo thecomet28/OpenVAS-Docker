@@ -17,10 +17,13 @@ if [ ! -f "/firstrun" ]; then
 	echo "Running first start configuration..."
 
 	echo "Creating Openvas NVT sync user..."
-	useradd --home-dir /usr/local/share/openvas openvas-sync
-	chown openvas-sync:openvas-sync -R /usr/local/share/openvas
-	chown openvas-sync:openvas-sync -R /usr/local/var/lib/openvas
-
+	useradd --home-dir /var/lib/openvas openvas-sync
+	chown openvas-sync:openvas-sync -R /var/lib/openvas
+	
+	echo "Creating NVT folder..."
+	mkdir -p /var/lib/openvas/plugins/
+	chown openvas-sync:openvas-sync -R /var/lib/openvas/plugins
+	
 	touch /firstrun
 fi
 
@@ -67,19 +70,6 @@ while  [ "${X}" != "PONG" ]; do
 done
 echo "Redis ready."
 
-if  [ ! -d /data/plugins ]; then
-	echo "Creating NVT Plugins folder..."
-	mkdir /data/plugins
-fi
-
-if [ ! -h /usr/local/var/lib/openvas/plugins ]; then
-	echo "Fixing NVT Plugins folder..."
-	rm -rf /usr/local/var/lib/openvas/plugins
-	ln -s /data/plugins /usr/local/var/lib/openvas/plugins
-	chown openvas-sync:openvas-sync -R /data/plugins
-	chown openvas-sync:openvas-sync -R /usr/local/var/lib/openvas/plugins
-fi
-
 echo "Updating NVTs..."
 su -c "rsync --compress-level=9 --links --times --omit-dir-times --recursive --partial --quiet rsync://feed.community.greenbone.net:/nvt-feed /usr/local/var/lib/openvas/plugins" openvas-sync
 echo "+++++++++++++++++++++++++++++++++++"
@@ -96,20 +86,30 @@ if [ -S /data/ospd.sock ]; then
   rm /data/ospd.sock
 fi
 
-if [ ! -d /var/run/ospd ]; then
-  mkdir /var/run/ospd
+if [ -f /run/ospd/ospd.pid ]; then
+  rm /run/ospd/ospd.pid
+fi
+
+if [ -S /tmp/ospd.sock ]; then
+  rm /tmp/ospd.sock
+fi
+
+if [ -S /run/ospd/ospd.sock ]; then
+  rm /run/ospd/ospd-openvas.sock
+fi
+
+if [ ! -d /run/ospd ]; then
+  mkdir /run/ospd
 fi
 
 echo "Starting Open Scanner Protocol daemon for OpenVAS..."
-ospd-openvas --log-file /usr/local/var/log/gvm/ospd-openvas.log --unix-socket /data/ospd.sock --log-level INFO
+ospd-openvas --log-file /var/log/gvm/ospd-openvas.log --unix-socket /run/ospd/ospd-openvas.sock --socket-mode 0o666 --log-level INFO
 
-while  [ ! -S /data/ospd.sock ]; do
+while  [ ! -S /run/ospd/ospd-openvas.sock ]; do
 	sleep 1
 done
 
-chmod 666 /data/ospd.sock
-
-touch /usr/local/var/log/gvm/ssh-connection.log
+touch /var/log/gvm/ssh-connection.log
 /connect.sh &
 
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++"
