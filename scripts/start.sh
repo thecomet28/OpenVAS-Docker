@@ -71,7 +71,7 @@ done
 echo "Redis ready."
 
 echo "Updating NVTs..."
-su -c "rsync --compress-level=9 --links --times --omit-dir-times --recursive --partial --quiet rsync://feed.community.greenbone.net:/nvt-feed /usr/local/var/lib/openvas/plugins" openvas-sync
+su -c "rsync --compress-level=9 --links --times --omit-dir-times --recursive --partial --quiet rsync://feed.community.greenbone.net:/nvt-feed /var/lib/openvas/plugins" openvas-sync
 echo "+++++++++++++++++++++++++++++++++++"
 echo "+ Enabling Automating NVT updates +"
 echo "+++++++++++++++++++++++++++++++++++"
