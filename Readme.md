@@ -1,4 +1,4 @@
-![Netizen Corp](https://www.netizen.net/assets/img/netizen_banner_cybersecure_small.png)
+![(https://www.netizen.net/assets/img/netizen_banner_cybersecure_small.png)](https://pages.github.com/)
 
 # OpenVAS with OSPd Docker Image
 
