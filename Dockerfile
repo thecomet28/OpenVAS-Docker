@@ -1,4 +1,4 @@
-FROM ubuntu:20.10
+FROM ubuntu:21.10
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
@@ -7,11 +7,11 @@ COPY install-pkgs.sh /install-pkgs.sh
 
 RUN bash /install-pkgs.sh
 
-ENV gvm_libs_version="v21.4.0" \
-    openvas_scanner_version="v21.4.0" \
+ENV gvm_libs_version="v21.4.3" \
+    openvas_scanner_version="v21.4.3" \
     openvas_smb="v21.4.0" \
-    open_scanner_protocol_daemon="v21.4.0" \
-    ospd_openvas="v21.4.0"
+    open_scanner_protocol_daemon="v21.4.4" \
+    ospd_openvas="v21.4.3"
 
 RUN echo "Starting Build..." && mkdir /build
 
