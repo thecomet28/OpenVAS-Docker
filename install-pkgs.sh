@@ -34,6 +34,7 @@ libsnmp-dev
 libssh-gcrypt-dev
 libunistring-dev
 libxml2-dev
+nano
 net-tools
 nmap
 openssh-client
