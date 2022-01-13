@@ -35,7 +35,7 @@ if  [ ! -f /var/lib/gvm/.ssh/known_hosts ]; then
 	mv /var/lib/gvm/.ssh/known_hosts.temp /var/lib/gvm/.ssh/known_hosts
 fi
 
-if  [ -f /data/ssh/key]; then
+if  [ -f /data/ssh/key ]; then
 	echo "Moving SSH Key..."
 	mv data/ssh/key /var/lib/gvm/.ssh/key
 	mv data/ssh/key.pub /var/lib/gvm/.ssh/key.pub
