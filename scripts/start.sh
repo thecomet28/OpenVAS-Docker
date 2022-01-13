@@ -8,9 +8,42 @@ if [ -z $MASTER_ADDRESS ]; then
 	exit 1
 fi
 
-if  [ ! -d /data ]; then
-	echo "Creating Data folder..."
-        mkdir /data
+if [ ! -d /var/lib/gvm/.ssh ]; then
+    mkdir -p /var/lib/gvm/.ssh
+fi
+
+if [ -f /data/scannerid ]; then
+	echo "Moving Scanner ID to new location..."
+	mv /data/scannerid /var/lib/gvm/.scannerid
+fi
+
+if [ ! -f /var/lib/gvm/.scannerid ]; then
+	echo "Generating scanner id..."
+	
+	echo $(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 10 | head -n 1) > /var/lib/gvm/.scannerid
+fi
+
+if  [ -f /data/ssh/known_hosts ]; then
+	echo "Moving Known Hosts to new location..."
+	
+	mv /data/ssh/known_hosts /var/lib/gvm/.ssh/known_hosts
+fi
+
+if  [ ! -f /var/lib/gvm/.ssh/known_hosts ]; then
+	echo "Getting Master SSH key..."
+	ssh-keyscan -t ed25519 -p $MASTER_PORT $MASTER_ADDRESS > /var/lib/gvm/.ssh/known_hosts.temp
+	mv /var/lib/gvm/.ssh/known_hosts.temp /var/lib/gvm/.ssh/known_hosts
+fi
+
+if  [ -f /data/ssh/key ]; then
+	echo "Moving SSH Key..."
+	mv data/ssh/key /var/lib/gvm/.ssh/key
+	mv data/ssh/key.pub /var/lib/gvm/.ssh/key.pub
+fi
+
+if  [ ! -f /var/lib/gvm/.ssh/key ]; then
+	echo "Setup SSH key..."
+	ssh-keygen -t ed25519 -f /var/lib/gvm/.ssh/key -N "" -C "$(cat /var/lib/gvm/.scannerid)"
 fi
 
 if [ ! -f "/firstrun" ]; then
@@ -25,27 +58,6 @@ if [ ! -f "/firstrun" ]; then
 	chown openvas-sync:openvas-sync -R /var/lib/openvas/plugins
 	
 	touch /firstrun
-fi
-
-if [ ! -f "/data/scannerid" ]; then
-	echo "Generating scanner id..."
-	
-	echo $(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 10 | head -n 1) > /data/scannerid
-fi
-
-if  [ ! -d /data/ssh ]; then
-	mkdir /data/ssh
-fi
-
-if  [ ! -f /data/ssh/known_hosts ]; then
-	echo "Getting Master SSH key..."
-	ssh-keyscan -t ed25519 -p $MASTER_PORT $MASTER_ADDRESS > /data/ssh/known_hosts.temp
-	mv /data/ssh/known_hosts.temp /data/ssh/known_hosts
-fi
-
-if  [ ! -f /data/ssh/key ]; then
-	echo "Setup SSH key..."
-	ssh-keygen -t ed25519 -f /data/ssh/key -N "" -C "$(cat /data/scannerid)"
 fi
 
 if [ ! -d "/run/redis" ]; then
@@ -117,10 +129,10 @@ echo "+ Your OpenVAS Scanner container is now ready to use! +"
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo ""
 echo "-------------------------------------------------------"
-echo "Scanner id: $(cat /data/scannerid)"
-echo "Public key: $(cat /data/ssh/key.pub)"
+echo "Scanner id: $(cat /var/lib/gvm/.scannerid)"
+echo "Public key: $(cat /var/lib/gvm/.ssh/key.pub)"
 echo "Master host key (Check that it matches the public key from the master):"
-cat /data/ssh/known_hosts
+cat /var/lib/gvm/.ssh/known_hosts
 echo "-------------------------------------------------------"
 echo ""
 echo "++++++++++++++++"
